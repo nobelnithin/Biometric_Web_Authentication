@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>
-      Authentication
-    </title>
+  <title>Authentication</title>
 </head>
 <body>
   <div class="container">
@@ -12,7 +10,7 @@
     <form id="loginForm">
       <!-- Your login form fields here (username, password) -->
 
-      <!-- Add a button to trigger biometric authentication -->
+      <!-- Add a button to trigger local biometric authentication -->
       <button type="button" id="biometricButton">Login with Biometrics</button>
 
       <button type="submit">Login</button>
@@ -20,33 +18,31 @@
   </div>
 
   <script>
-    // Check for WebAuthn support in the browser
-    if (window.PublicKeyCredential) {
+    // Check if the browser supports the Credential Management API
+    if ('credentials' in navigator) {
       const biometricButton = document.getElementById('biometricButton');
       const loginForm = document.getElementById('loginForm');
 
       // Listen for the biometric login button click
       biometricButton.addEventListener('click', async () => {
         try {
-          // Initiate the biometric authentication
-          const credentials = await navigator.credentials.get({ publicKey: {} });
+          // Initiate the local biometric authentication
+          const credentials = await navigator.credentials.get({ mediation: 'silent' });
 
           // If the user is authenticated via biometrics, fill the login form and submit
-          if (credentials && credentials.type === 'public-key') {
-            // Send the public key to the server for verification (see server-side implementation)
-            const publicKey = credentials.publicKey;
-            loginForm.username.value = publicKey.id;
-            loginForm.password.value = JSON.stringify(publicKey);
+          if (credentials && credentials.type === 'password') {
+            loginForm.username.value = credentials.id;
+            loginForm.password.value = credentials.password;
             loginForm.submit();
           }
         } catch (error) {
-          // Biometric authentication failed or was cancelled
-          console.error('Biometric authentication error:', error);
+          // Local biometric authentication failed or was cancelled
+          console.error('Local biometric authentication error:', error);
         }
       });
     } else {
-      // WebAuthn is not supported in this browser, show a message or fallback to standard login
-      console.log('Biometric authentication is not supported in this browser.');
+      // Credential Management API is not supported in this browser, show a message or fallback to standard login
+      console.log('Local biometric authentication is not supported in this browser.');
     }
   </script>
 </body>
