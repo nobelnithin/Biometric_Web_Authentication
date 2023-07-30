@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    Authentication
+</head>
+<body>
+  <div class="container">
+    <h1>Website Name</h1>
+    <h2>Login</h2>
+    <form id="loginForm">
+      <!-- Your login form fields here (username, password) -->
+
+      <!-- Add a button to trigger biometric authentication -->
+      <button type="button" id="biometricButton">Login with Biometrics</button>
+
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script>
+    // Check for WebAuthn support in the browser
+    if (window.PublicKeyCredential) {
+      const biometricButton = document.getElementById('biometricButton');
+      const loginForm = document.getElementById('loginForm');
+
+      // Listen for the biometric login button click
+      biometricButton.addEventListener('click', async () => {
+        try {
+          // Initiate the biometric authentication
+          const credentials = await navigator.credentials.get({ publicKey: {} });
+
+          // If the user is authenticated via biometrics, fill the login form and submit
+          if (credentials && credentials.type === 'public-key') {
+            // Send the public key to the server for verification (see server-side implementation)
+            const publicKey = credentials.publicKey;
+            loginForm.username.value = publicKey.id;
+            loginForm.password.value = JSON.stringify(publicKey);
+            loginForm.submit();
+          }
+        } catch (error) {
+          // Biometric authentication failed or was cancelled
+          console.error('Biometric authentication error:', error);
+        }
+      });
+    } else {
+      // WebAuthn is not supported in this browser, show a message or fallback to standard login
+      console.log('Biometric authentication is not supported in this browser.');
+    }
+  </script>
+</body>
+</html>
